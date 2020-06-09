@@ -1,3 +1,3 @@
 # Java Spring Demo
 
-Compatible with JDK v14
+Compatible with OpenJDK 8
