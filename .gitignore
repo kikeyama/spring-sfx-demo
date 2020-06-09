@@ -1,2 +1,3 @@
 signalfx-tracing.jar
 dd-java-agent.jar
+/build/
