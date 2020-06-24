@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import org.json.simple.JSONObject;
 import java.lang.NullPointerException;
 import java.lang.IllegalArgumentException;
+import org.apache.commons.lang3.RandomStringUtils;
 
 @RestController
 public class DemoRest {
@@ -52,6 +53,19 @@ public class DemoRest {
 
 		String flaskEndpoint = "http://" + flaskHost + "/?name=" + name;
 		String result = restTemplate.getForObject(flaskEndpoint, String.class);
+		return result;
+	}
+
+	@GetMapping("/api/gorilla/id")
+	public String requestGorilla(@RequestParam String httpStatus) {
+		
+		String gorillaHost = System.getenv("GORILLA_HOST");
+		String randomTraceId = RandomStringUtils.randomAlphanumeric(16).toLowerCase();
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		String gorillaEndpoint = "http://" + gorillaHost + "/api/trace/" + randomTraceId + "?httpstatus=" + httpStatus;
+		String result = restTemplate.getForObject(gorillaEndpoint, String.class);
 		return result;
 	}
 
