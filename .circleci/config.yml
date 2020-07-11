@@ -28,7 +28,7 @@ jobs:
           color: '#42e2f4'
           mentions: 'U23ACBMB5,U7CCVF98S'
           message: ビルド開始するで
-          webhook: webhook
+          webhook: ${SLACK_WEBHOOK}
       - checkout
 
       # Download and cache dependencies
@@ -50,10 +50,10 @@ jobs:
 
       # Slack
       - slack/status:
-          fail_only: true
+          #fail_only: true
           mentions: 'U23ACBMB5,U7CCVF98S'
           only_for_branches: master
-          webhook: webhook
+          webhook: ${SLACK_WEBHOOK}
 orbs:
   slack: circleci/slack@3.4.2
 workflows:
@@ -61,5 +61,5 @@ workflows:
     jobs:
       - slack/approval-notification:
           message: Pending approval
-          webhook: webhook
+          webhook: ${SLACK_WEBHOOK}
       - build
