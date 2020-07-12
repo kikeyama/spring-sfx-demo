@@ -93,26 +93,27 @@ orbs:
       signalfx:
         description: Send events to SignalFx
         steps:
-          - run: |
-            curl -X POST -H "Content-Type: application/json" \
-            -H "X-SF-Token: <<signalfx_access_token>>" \
-            -d "[
-                {
-                  \"eventType\": \"Sample\",
-                  \"dimensions\": {
-                    \"service\": \"<<parameters.service>>\"
-                  },
-                  \"properties\": {
-                    \"vcs_revision\": \"$CIRCLE_SHA1\",
-                    \"build_num\": \"$CIRCLE_BUILD_NUM\",
-                    \"status\": \"\",
-                    \"build_url\": \"$CIRCLE_BUILD_URL\",
-                    \"user\": \"$CIRCLE_USERNAME\"
-                  },
-                  \"category\": \"USER_DEFINED\"
-                }
-              ]" \
-            https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
+          - run: 
+              command: |
+                curl -X POST -H "Content-Type: application/json" \
+                -H "X-SF-Token: <<signalfx_access_token>>" \
+                --data "[
+                    {
+                      \"eventType\": \"Sample\",
+                      \"dimensions\": {
+                        \"service\": \"<<parameters.service>>\"
+                      },
+                      \"properties\": {
+                        \"vcs_revision\": \"$CIRCLE_SHA1\",
+                        \"build_num\": \"$CIRCLE_BUILD_NUM\",
+                        \"status\": \"\",
+                        \"build_url\": \"$CIRCLE_BUILD_URL\",
+                        \"user\": \"$CIRCLE_USERNAME\"
+                      },
+                      \"category\": \"USER_DEFINED\"
+                    }
+                  ]" \
+                https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
     jobs:
       myjob:
         steps:
