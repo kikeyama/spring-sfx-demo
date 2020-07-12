@@ -90,7 +90,7 @@ orbs:
         description: Service name used in SignalFx
         type: string
     commands:
-      signalfx:
+      events:
         description: Send events to SignalFx
         steps:
           - run: |
@@ -113,10 +113,10 @@ orbs:
                   }
                 ]" \
               https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
-    jobs:
-      myjob:
-        steps:
-          - signalfx
+#    jobs:
+#      myjob:
+#        steps:
+#          - signalfx
 
 workflows:
   main:
@@ -130,4 +130,4 @@ workflows:
       - build:
           requires:
             - hold
-      - my-orb/myjob
+      - my-orb/events
