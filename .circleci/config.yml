@@ -29,6 +29,15 @@ jobs:
           mentions: 'U23ACBMB5,U7CCVF98S'
           message: ビルド開始するで
           webhook: ${SLACK_WEBHOOK}
+
+      # Splunk
+      - slack/notify:
+          message: ビルド開始するで
+          webhook: ${SPLUNK_WEBHOOK}
+
+      - webhook/notify:
+          endpoint: ${SPLUNK_WEBHOOK}
+          
       - checkout
 
       # Download and cache dependencies
@@ -48,18 +57,29 @@ jobs:
       # run tests!
       - run: gradle test
 
+      # Webhook
+#      - webhook/notify:
+#          endpoint: ${WEBHOOK_ENDPOINT}
+
       # Slack
       - slack/status:
           #fail_only: true
           mentions: 'U23ACBMB5,U7CCVF98S'
           only_for_branches: master
           webhook: ${SLACK_WEBHOOK}
+
+      # Splunk
+      - slack/status:
+          only_for_branches: master
+          webhook: ${SPLUNK_WEBHOOK}
 orbs:
   slack: circleci/slack@3.4.2
+#  webhook: eddiewebb/webhook@volatile
 workflows:
   my-workflow:
     jobs:
       - slack/approval-notification:
+          mentions: U23ACBMB5
           message: Pending approval
           webhook: ${SLACK_WEBHOOK}
       - build
