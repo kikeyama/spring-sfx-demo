@@ -93,7 +93,7 @@ orbs:
         steps:
           - run: |
             curl -X POST -H "Content-Type: application/json" \
-            -H "X-SF-Token: <<signalfx_access_token>>" \
+            -H "X-SF-Token: <<parameters.signalfx_access_token>>" \
             --data "[
                 {
                   \"eventType\": \"Sample\",
@@ -110,7 +110,7 @@ orbs:
                   \"category\": \"USER_DEFINED\"
                 }
               ]" \
-            https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
+            https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
     jobs:
       signalfx_event_job:
         steps:
