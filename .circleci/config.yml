@@ -47,15 +47,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: gradle dependencies
+      - run: ./gradlew build
 
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
-
-      # run tests!
-      - run: gradle test
 
       # Slack
       - slack/status:
@@ -70,6 +67,7 @@ jobs:
       - slack/status:
           only_for_branches: master
           webhook: ${SPLUNK_WEBHOOK}
+
 orbs:
   slack: circleci/slack@3.4.2
   webhook: eddiewebb/webhook@volatile
@@ -99,43 +97,48 @@ orbs:
             description: Service name used in SignalFx
             type: string
           event_type:
-            default: ""
+            default: ${CIRCLE_JOB}
             description: Enter event name (e.g. deploy | build | rollback)
             type: string
         steps:
           - run:
               when: on_success
               name: set_status_success
-              command: export BUILD_STATUS="success" >> $BASH_ENV
+              command: |
+                echo 'export BUILD_STATUS="success"' >> $BASH_ENV
           - run:
               when: on_fail
               name: set_status_failure
-              command: export BUILD_STATUS="failure" >> $BASH_ENV
-          - run: |
-              curl -X POST -H "Content-Type: application/json" \
-              -H "X-SF-Token: <<parameters.signalfx_access_token>>" --data \
-              "[
-                {
-                  \"eventType\": \"CircleCI Deploy\",
-                  \"dimensions\": {
-                    \"service\": \"<<parameters.service>>\"
-                  },
-                  \"properties\": {
-                    \"vcs_revision\": \"$CIRCLE_SHA1\",
-                    \"build_num\": \"$CIRCLE_BUILD_NUM\",
-                    \"status\": \"$BUILD_STATUS\",
-                    \"build_url\": \"$CIRCLE_BUILD_URL\",
-                    \"user\": \"$CIRCLE_USERNAME\"
-                  },
-                  \"category\": \"USER_DEFINED\"
-                }
-              ]" \
-              https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
+              command: |
+                echo 'export BUILD_STATUS="failure"' >> $BASH_ENV
+          - run: 
+              command: |
+                curl -X POST -H "Content-Type: application/json" \
+                -H "X-SF-Token: <<parameters.signalfx_access_token>>" --data \
+                "[
+                  {
+                    \"eventType\": \"CircleCI <<parameters.event_type>>\",
+                    \"dimensions\": {
+                      \"service\": \"<<parameters.service>>\"
+                    },
+                    \"properties\": {
+                      \"vcs_revision\": \"$CIRCLE_SHA1\",
+                      \"build_num\": \"$CIRCLE_BUILD_NUM\",
+                      \"status\": \"$BUILD_STATUS\",
+                      \"build_url\": \"$CIRCLE_BUILD_URL\",
+                      \"user\": \"$CIRCLE_USERNAME\"
+                    },
+                    \"category\": \"USER_DEFINED\",
+                    \"timestamp\": $((`date +%s` * 1000))
+                  }
+                ]" \
+                https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
+              name: send_signalfx_event
     jobs:
       signalfx_event_job:
         parameters:
           event_type:
-            default: ""
+            default: ${CIRCLE_JOB}
             description: Enter event name (e.g. deploy | build | rollback)
             type: string
         executor: signalfx_event_executor
