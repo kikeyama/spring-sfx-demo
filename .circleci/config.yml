@@ -98,20 +98,32 @@ orbs:
             default: ${CIRCLE_PROJECT_REPONAME}
             description: Service name used in SignalFx
             type: string
+          event_type:
+            default: ""
+            description: Enter event name (e.g. deploy | build | rollback)
+            type: string
         steps:
+          - run:
+              when: on_success
+              name: set_status_success
+              command: export BUILD_STATUS="success" >> $BASH_ENV
+          - run:
+              when: on_fail
+              name: set_status_failure
+              command: export BUILD_STATUS="failure" >> $BASH_ENV
           - run: |
               curl -X POST -H "Content-Type: application/json" \
               -H "X-SF-Token: <<parameters.signalfx_access_token>>" --data \
               "[
                 {
-                  \"eventType\": \"Sample\",
+                  \"eventType\": \"CircleCI Deploy\",
                   \"dimensions\": {
                     \"service\": \"<<parameters.service>>\"
                   },
                   \"properties\": {
                     \"vcs_revision\": \"$CIRCLE_SHA1\",
                     \"build_num\": \"$CIRCLE_BUILD_NUM\",
-                    \"status\": \"\",
+                    \"status\": \"$BUILD_STATUS\",
                     \"build_url\": \"$CIRCLE_BUILD_URL\",
                     \"user\": \"$CIRCLE_USERNAME\"
                   },
@@ -121,6 +133,11 @@ orbs:
               https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
     jobs:
       signalfx_event_job:
+        parameters:
+          event_type:
+            default: ""
+            description: Enter event name (e.g. deploy | build | rollback)
+            type: string
         executor: signalfx_event_executor
         steps:
           - signalfx_event_command
@@ -129,6 +146,7 @@ workflows:
   main:
     jobs:
       - slack/approval-notification:
+          name: slack_approval_notification
           mentions: U23ACBMB5
           message: Pending approval
           webhook: ${SLACK_WEBHOOK}
@@ -139,3 +157,7 @@ workflows:
             - hold
       - signalfx_orb/signalfx_event_job:
           name: signalfx_event
+          event_type: deploy
+          requires:
+            - hold
+            - build
