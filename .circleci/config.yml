@@ -73,50 +73,50 @@ jobs:
 orbs:
   slack: circleci/slack@3.4.2
   webhook: eddiewebb/webhook@volatile
-  my-orb:
-    orbs:
-      signalfx: kikeyama/signalfx-events@0.1.0
-    parameters:
-      signalfx_access_token:
-        default: ${SIGNALFX_ACCESS_TOKEN}
-        description: Enter SignalFx access token or set env var SIGNALFX_ACCESS_TOKEN
-        type: string
-      signalfx_realm:
-        default: ${SIGNALFX_REALM}
-        description: Enter SignalFx realm (us0, us1, eu0, etc) or set env var SIGNALFX_REALM
-        type: string
-      service:
-        default: ${CIRCLE_PROJECT_REPONAME}
-        description: Service name used in SignalFx
-        type: string
+  signalfx_orb:
     commands:
-      events:
+      signalfx_event_command:
         description: Send events to SignalFx
+        parameters:
+          signalfx_access_token:
+            default: ${SIGNALFX_ACCESS_TOKEN}
+            description: Enter SignalFx access token or set env var SIGNALFX_ACCESS_TOKEN
+            type: string
+          signalfx_realm:
+            default: ${SIGNALFX_REALM}
+            description: Enter SignalFx realm (us0, us1, eu0, etc) or set env var SIGNALFX_REALM
+            type: string
+          service:
+            default: ${CIRCLE_PROJECT_REPONAME}
+            description: Service name used in SignalFx
+            type: string
         steps:
           - run: |
-              curl -X POST -H "Content-Type: application/json" \
-              -H "X-SF-Token: <<signalfx_access_token>>" \
-              --data "[
-                  {
-                    \"eventType\": \"Sample\",
-                    \"dimensions\": {
-                      \"service\": \"<<parameters.service>>\"
-                    },
-                    \"properties\": {
-                      \"vcs_revision\": \"$CIRCLE_SHA1\",
-                      \"build_num\": \"$CIRCLE_BUILD_NUM\",
-                      \"status\": \"\",
-                      \"build_url\": \"$CIRCLE_BUILD_URL\",
-                      \"user\": \"$CIRCLE_USERNAME\"
-                    },
-                    \"category\": \"USER_DEFINED\"
-                  }
-                ]" \
-              https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
-#    jobs:
-#      myjob:
-#        steps:
-#          - signalfx
+            curl -X POST -H "Content-Type: application/json" \
+            -H "X-SF-Token: <<signalfx_access_token>>" \
+            -d "\
+              [
+                {
+                  \"eventType\": \"Sample\",
+                  \"dimensions\": {
+                    \"service\": \"<<parameters.service>>\"
+                  },
+                  \"properties\": {
+                    \"vcs_revision\": \"$CIRCLE_SHA1\",
+                    \"build_num\": \"$CIRCLE_BUILD_NUM\",
+                    \"status\": \"\",
+                    \"build_url\": \"$CIRCLE_BUILD_URL\",
+                    \"user\": \"$CIRCLE_USERNAME\"
+                  },
+                  \"category\": \"USER_DEFINED\"
+                }
+              ]
+            " \
+            https://ingest.<<signalfx_realm>>.signalfx.com/v2/event
+    jobs:
+      signalfx_event_job:
+        steps:
+          - signalfx_event_command
 
 workflows:
   main:
@@ -130,4 +130,4 @@ workflows:
       - build:
           requires:
             - hold
-      - my-orb/events
+      - signalfx_orb/signalfx_event_job
