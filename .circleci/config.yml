@@ -74,6 +74,14 @@ orbs:
   slack: circleci/slack@3.4.2
   webhook: eddiewebb/webhook@volatile
   signalfx_orb:
+    executors:
+      signalfx_event_executor:
+        parameters:
+          version:
+            type: string
+            default: "2.4"
+        docker:
+          - image: circleci/ruby:<<parameters.version>>
     commands:
       signalfx_event_command:
         description: Send events to SignalFx
@@ -92,9 +100,9 @@ orbs:
             type: string
         steps:
           - run: |
-            curl -X POST -H "Content-Type: application/json" \
-            -H "X-SF-Token: <<parameters.signalfx_access_token>>" \
-            --data "[
+              curl -X POST -H "Content-Type: application/json" \
+              -H "X-SF-Token: <<parameters.signalfx_access_token>>" --data \
+              "[
                 {
                   \"eventType\": \"Sample\",
                   \"dimensions\": {
@@ -110,9 +118,10 @@ orbs:
                   \"category\": \"USER_DEFINED\"
                 }
               ]" \
-            https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
+              https://ingest.<<parameters.signalfx_realm>>.signalfx.com/v2/event
     jobs:
       signalfx_event_job:
+        executor: signalfx_event_executor
         steps:
           - signalfx_event_command
 
@@ -128,4 +137,5 @@ workflows:
       - build:
           requires:
             - hold
-      - signalfx_orb/signalfx_event_job
+      - signalfx_orb/signalfx_event_job:
+          name: signalfx_event
