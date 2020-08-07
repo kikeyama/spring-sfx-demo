@@ -116,6 +116,7 @@ workflows:
           requires:
             - slack_approval_notification
       - manifest_pull_request:
+          context: kikeyama-context
           requires:
             - hold
       - signalfx/workflow-event:
