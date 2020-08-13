@@ -21,4 +21,4 @@ COPY --from=TEMP_BUILD_IMAGE $APP_HOME/build/libs/${ARTIFACT_NAME} app.jar
 RUN wget https://github.com/signalfx/signalfx-java-tracing/releases/latest/download/signalfx-tracing.jar -O ./signalfx-tracing.jar
 #ENV JAVA_OPTS $JAVA_OPTS -javaagent:./signalfx-tracing.jar -Dsignalfx.service.name=kikeyama_spring
 EXPOSE 8080
-CMD [ "java", "-javaagent:./signalfx-tracing.jar", "-Dsignalfx.service.name=kikeyama_spring", "-Dsignalfx.logs.injection=true", "-jar", "app.jar" ]
+CMD [ "java", "-javaagent:./signalfx-tracing.jar", "-Dsignalfx.service.name=kikeyama_spring", "-Dsignalfx.logs.injection=true", "-Xmx32m", "-XX:MaxRAM=64m", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "app.jar" ]
