@@ -26,6 +26,12 @@ public class DemoRest {
 		return "Greetings from Spring Boot!";
 	}
 
+	@GetMapping("/healthz")
+	public Healthz healthz() {
+		logger.info("healthz endpoint");
+		return new Healthz("ok");
+	}
+
 	@GetMapping("/error")
 	public String error() {
 		logger.info("error endpoint");
