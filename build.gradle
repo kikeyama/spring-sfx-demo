@@ -15,6 +15,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 	implementation 'org.apache.commons:commons-lang3:3.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
@@ -27,8 +28,10 @@ dependencies {
 	
 	testCompileOnly 'org.projectlombok:lombok:1.18.12'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+	runtimeOnly 'org.postgresql:postgresql:42.2.8'
 }
 
-test {
-	useJUnitPlatform()
-}
+//test {
+//	useJUnitPlatform()
+//}
