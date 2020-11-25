@@ -64,7 +64,7 @@ jobs:
             # Set version as annotation and label
             ~/kustomize edit add annotation --force version:${CIRCLE_SHA1}
             ~/kustomize edit add label --force version:`echo ${CIRCLE_SHA1} | cut -b 1-7`
-            git add .
+            git add ../
             git commit -m "update ${APP_DIR} manifest for ${CIRCLE_SHA1}"
             git push -u origin gitops-${GITHUB_USERNAME}-${CIRCLE_SHA1}
       - run:
